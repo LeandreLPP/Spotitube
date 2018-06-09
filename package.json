@@ -1,0 +1,30 @@
+{
+  "name": "spotitube",
+  "version": "0.1.0",
+  "dependencies": {
+    "discord.js": "~11.3.2"
+  },
+  "description": "A discord bot that link a corresponding youtube video when a Spotify link is posted.",
+  "main": "spotitube.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LeandreLPP",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeandreLPP/Spotitube.git"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "spotify",
+    "youtube"
+  ],
+  "bugs": {
+    "url": "https://github.com/LeandreLPP/Spotitube/issues",
+    "email": "leandre.lepolles@free.fr"
+  },
+  "homepage": "https://github.com/LeandreLPP/Spotitube#readme"
+}
