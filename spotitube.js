@@ -9,9 +9,11 @@ bot.login(client_secret.discord_token);
 
 bot.on('message', function(message) {
     // Detects a spotify link
-    if(message.content.includes("https://open.spotify.com/track/")) {
+    const regexSong = /https:\/\/open\.spotify\.com\/track\/(\w*)/;
+    var res;
+    if(res = message.content.match(regexSong)) {
         // extract the id of the song
-        var id = message.content.substring(message.content.lastIndexOf("/")+1, message.content.indexOf("?si=")); 
+        var id = res[1];
 
         console.log("Link spotify detected. ID="+id);
         identifySong(id, (song) => 
@@ -94,7 +96,7 @@ const getSpotifyToken = function(callback) {
     req.end();
 }
 
-const searchYoutubeVideo = function(song, callback) { //TODO: this function
+const searchYoutubeVideo = function(song, callback) {
     var searchTerms = song.name;
     song.authors.forEach(element => searchTerms += " "+element);
     var getData = querystring.stringify({ 
