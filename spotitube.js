@@ -39,7 +39,7 @@ bot.on('message', function(message) {
             console.log("Artist of id " + id + " identified as " + artistName);
             searchYoutubeChannel(artistName, (channel) => {
                 console.log("Youtube channel found: \"" + channel.name + "\" at youtube code "+ channel.code);
-                message.channel.send("https://www.youtube.com/" + channel.prefix + "/" + channel.code);
+                message.channel.send("https://www.youtube.com/channel/" + channel.code);
             }, getCallbackError(message.channel, "La recherche de chaine correspondante a échoué. Toutes mes excuses."));
         }, getCallbackError(message.channel, "Ha ha ha, il a cru que son lien fonctionnait !"));
     }
@@ -199,52 +199,15 @@ const searchYoutubeChannel = function(artistName, callback, callbackError) {
             if(obj.items.length > 0) 
             {
                 const ret = {
-                    'prefix': 'channel',
                     'name': obj.items[0].snippet.title,
                     'code': obj.items[0].id.channelId
                 }
                 console.log("Youtube channel is ID "+ret.code);
-                getYoutubeChannelCustomURL(ret.code, (channel) => {
-                    if(channel.code === undefined) 
-                        callback(ret);
-                    else
-                        callback(channel);
-                }, callbackError);
+                callback(ret);
             } else {
                 callbackError("No video found for name \""+artistName+"\".");
             }
         }).on("error", callbackError);
-    });
-    req.end();
-}
-
-const getYoutubeChannelCustomURL = function(idChannel, callback, callbackError) {
-    var getData = querystring.stringify({ 
-        'id': idChannel,
-        'part':'snippet',
-        'key': client_secret.google_key
-    });
-    var url = "https://www.googleapis.com/youtube/v3/channels?"+getData;
-    var req = https.request(url, (res) => {
-        var body = "";
-        res.on("data", (chunk) => {
-            body += chunk;
-        }).on("end", () => {
-            const obj = JSON.parse(body);
-            let channel = obj.items[0];
-            if(obj.items.length > 0) 
-            {
-                const ret = {
-                    'prefix': 'user',
-                    'name': channel.snippet.title,
-                    'code': channel.snippet.customUrl
-                }
-                console.log("Custom URL is "+channel.snippet.customUrl);
-                callback(ret);
-            } else {
-                callbackError("Could not match the channel ID \""+idChannel+"\" with a custom URL.");
-            }
-        }).on("error", (error) => console.log("Error while searching channel: "+ error));
     });
     req.end();
 }
