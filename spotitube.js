@@ -29,8 +29,8 @@ bot.on('message', function(message) {
             {
                 console.log("Video found: \""+video.name+"\" at youtube code "+video.code);
                 message.channel.send("https://www.youtube.com/watch?v="+video.code);
-            })
-        });
+            }, getCallbackError(message.channel, "J'ai pô trouvé de vidéo qui corresponde... :boude:"))
+        }, getCallbackError(message.channel, "Donnez moi un un lien valide, bondiou ! :grr:"));
     } else if(res = message.content.match(regexArtist)) {
         // extract the id of the artist
         var id = res[1];
@@ -39,9 +39,9 @@ bot.on('message', function(message) {
             console.log("Artist of id " + id + " identified as " + artistName);
             searchYoutubeChannel(artistName, (channel) => {
                 console.log("Youtube channel found: \"" + channel.name + "\" at youtube code "+ channel.code);
-                message.channel.send("https://www.youtube.com/user/"+channel.code);
-            });
-        });
+                message.channel.send("https://www.youtube.com/" + channel.prefix + "/" + channel.code);
+            }, getCallbackError(message.channel, "La recherche de chaine correspondante a échoué. Toutes mes excuses. :bow:"));
+        }, getCallbackError(message.channel, ":haha: il a cru que son lien fonctionnait !"));
     }
 }).on("error", (error) => {
     console.error("BOT ERROR: "+error);
@@ -51,7 +51,14 @@ bot.on('message', function(message) {
     console.log('Hey, how\'d I get here?');
 });
 
-const identifySong = function(id, callback) {
+const getCallbackError = function (channel, errorMessage) {
+    return ((error) => {
+        channel.send(errorMessage);
+        console.error("ERROR: " + error);
+    });
+}
+
+const identifySong = function(id, callback, callbackError) {
     getSpotifyToken((token) => {
         const options = {
             hostname: 'api.spotify.com',
@@ -67,23 +74,25 @@ const identifySong = function(id, callback) {
                 body += chunk;
             }).on("end", () => {
                 const obj = JSON.parse(body);
-                var song = {
-                    name : obj.name,
-                    authors : []
+                if(obj.error) {
+                    callbackError(obj.error);
+                } else {
+                    var song = {
+                        name : obj.name,
+                        authors : []
+                    }
+                    obj.artists.forEach(element => {
+                        song.authors.push(element.name);
+                    });
+                    callback(song);
                 }
-                obj.artists.forEach(element => {
-                    song.authors.push(element.name);
-                });
-                callback(song);
-            }).on("error", (error) => { 
-                console.error("RESPONSE ERROR: "+error) 
-            });
+            }).on("error", callbackError);
         });
         req.end();
     });
 }
 
-const identifyArtist = function(id, callback) {
+const identifyArtist = function(id, callback, callbackError) {
     getSpotifyToken((token) => {
         const options = {
             hostname: 'api.spotify.com',
@@ -99,11 +108,13 @@ const identifyArtist = function(id, callback) {
                 body += chunk;
             }).on("end", () => {
                 const obj = JSON.parse(body);
-                var name = obj.name;
-                callback(name);
-            }).on("error", (error) => { 
-                console.error("RESPONSE ERROR: "+error) 
-            });
+                if(obj.error) {
+                    callbackError(obj.error);
+                } else {
+                    var name = obj.name;
+                    callback(name);
+                }
+            }).on("error", callbackError);
         });
         req.end();
     });
@@ -138,7 +149,7 @@ const getSpotifyToken = function(callback) {
     req.end();
 }
 
-const searchYoutubeVideo = function(song, callback) {
+const searchYoutubeVideo = function(song, callback, callbackError) {
     var searchTerms = song.name;
     song.authors.forEach(element => searchTerms += " "+element);
     var getData = querystring.stringify({ 
@@ -155,20 +166,22 @@ const searchYoutubeVideo = function(song, callback) {
             body += chunk;
         }).on("end", () => {
             const obj = JSON.parse(body);
-            const item = obj.items[0];
-            var video = {
-                name: item.snippet.title,
-                code: item.id.videoId
+            if(obj.items.length > 0) {
+                const item = obj.items[0];
+                var video = {
+                    name: item.snippet.title,
+                    code: item.id.videoId
+                }
+                callback(video);
+            } else {
+                callbackError("No video found for query \""+searchTerms+"\".");
             }
-            callback(video);
-        }).on("error", (error) => { 
-            console.error("RESPONSE ERROR: "+error) 
-        });
+        }).on("error", callbackError);
     });
     req.end();
 }
 
-const searchYoutubeChannel = function(artistName, callback) {
+const searchYoutubeChannel = function(artistName, callback, callbackError) {
     var getData = querystring.stringify({ 
         'type': 'channel',
         'q': artistName,
@@ -185,17 +198,27 @@ const searchYoutubeChannel = function(artistName, callback) {
             const obj = JSON.parse(body);
             if(obj.items.length > 0) 
             {
-                console.log("Youtube channel is ID "+obj.items[0].id.channelId);
-                getYoutubeChannelCustomURL(obj.items[0].id.channelId, callback);
+                const ret = {
+                    'prefix': 'channel',
+                    'name': obj.items[0].snippet.title,
+                    'code': obj.items[0].id.channelId
+                }
+                console.log("Youtube channel is ID "+ret.code);
+                getYoutubeChannelCustomURL(ret.code, (channel) => {
+                    if(channel.code === undefined) 
+                        callback(ret);
+                    else
+                        callback(channel);
+                }, callbackError);
             } else {
-                errorCallback();
+                callbackError("No video found for name \""+artistName+"\".");
             }
-        }).on("error", (error) => console.log("Error while searching channel: "+ error));
+        }).on("error", callbackError);
     });
     req.end();
 }
 
-const getYoutubeChannelCustomURL = function(idChannel, callback) {
+const getYoutubeChannelCustomURL = function(idChannel, callback, callbackError) {
     var getData = querystring.stringify({ 
         'id': idChannel,
         'part':'snippet',
@@ -209,12 +232,18 @@ const getYoutubeChannelCustomURL = function(idChannel, callback) {
         }).on("end", () => {
             const obj = JSON.parse(body);
             let channel = obj.items[0];
-            const ret = {
-                'name': channel.snippet.title,
-                'code': channel.snippet.customUrl
+            if(obj.items.length > 0) 
+            {
+                const ret = {
+                    'prefix': 'user',
+                    'name': channel.snippet.title,
+                    'code': channel.snippet.customUrl
+                }
+                console.log("Custom URL is "+channel.snippet.customUrl);
+                callback(ret);
+            } else {
+                callbackError("Could not match the channel ID \""+idChannel+"\" with a custom URL.");
             }
-            console.log("Custom URL is "+channel.snippet.customUrl);
-            callback(ret);
         }).on("error", (error) => console.log("Error while searching channel: "+ error));
     });
     req.end();
