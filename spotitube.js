@@ -23,16 +23,20 @@ bot.on('message', function(message) {
                 authorsStr += element + ", ";
             });
             authorsStr = authorsStr.substring(0, authorsStr.length - 2);
-            console.log("Song "+ id +" identified as \""+ song.name + "\" by " + authorsStr);
+            console.log("Song of id "+ id +" identified as \""+ song.name + "\" by " + authorsStr);
             searchYoutubeVideo(song, (video) =>
             {
-                console.log("Video found: \""+video.name+"\" at code "+video.code);
+                console.log("Video found: \""+video.name+"\" at youtube code "+video.code);
                 message.channel.send("https://www.youtube.com/watch?v="+video.code);
             })
         });
     }
 }).on("error", (error) => {
     console.error("BOT ERROR: "+error);
+}).on('ready', () => {
+    console.log('Jacked up and good to go.');
+}).on('reconnecting', () => {
+    console.log('Hey, how\'d I get here?');
 });
 
 const identifySong = function(id, callback) {
