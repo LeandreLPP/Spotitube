@@ -29,8 +29,8 @@ bot.on('message', function(message) {
             {
                 console.log("Video found: \""+video.name+"\" at youtube code "+video.code);
                 message.channel.send("https://www.youtube.com/watch?v="+video.code);
-            }, getCallbackError(message.channel, "J'ai pô trouvé de vidéo qui corresponde... :boude:"))
-        }, getCallbackError(message.channel, "Donnez moi un un lien valide, bondiou ! :grr:"));
+            }, getCallbackError(message.channel, "J'ai pô trouvé de vidéo qui corresponde... Désolé."))
+        }, getCallbackError(message.channel, "Donnez moi un un lien valide, bondiou !"));
     } else if(res = message.content.match(regexArtist)) {
         // extract the id of the artist
         var id = res[1];
@@ -40,8 +40,8 @@ bot.on('message', function(message) {
             searchYoutubeChannel(artistName, (channel) => {
                 console.log("Youtube channel found: \"" + channel.name + "\" at youtube code "+ channel.code);
                 message.channel.send("https://www.youtube.com/" + channel.prefix + "/" + channel.code);
-            }, getCallbackError(message.channel, "La recherche de chaine correspondante a échoué. Toutes mes excuses. :bow:"));
-        }, getCallbackError(message.channel, ":haha: il a cru que son lien fonctionnait !"));
+            }, getCallbackError(message.channel, "La recherche de chaine correspondante a échoué. Toutes mes excuses."));
+        }, getCallbackError(message.channel, "Ha ha ha, il a cru que son lien fonctionnait !"));
     }
 }).on("error", (error) => {
     console.error("BOT ERROR: "+error);
