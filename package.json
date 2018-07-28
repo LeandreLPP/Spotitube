@@ -2,7 +2,8 @@
   "name": "spotitube",
   "version": "0.1.0",
   "dependencies": {
-    "discord.js": "~11.3.2"
+    "discord.js": "~11.3.2",
+    "dotenv": "^6.0.0"
   },
   "description": "A discord bot that link a corresponding youtube video when a Spotify link is posted.",
   "main": "spotitube.js",

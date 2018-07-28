@@ -1,11 +1,11 @@
 const Client = require("discord.js").Client;
 const https = require('https');
-const client_secret = require("client_secret");
 const querystring = require('querystring');
+require('dotenv').config();
 
 const bot = new Client();
 
-bot.login(client_secret.discord_token);
+bot.login(process.env.DISCORD_TOKEN);
 
 bot.on('message', function(message) {
     // Detects a spotify link
@@ -121,7 +121,7 @@ const identifyArtist = function(id, callback, callbackError) {
 }
 
 const getSpotifyToken = function(callback) {
-    const credential = client_secret.spotify_ID + ":" + client_secret.spotify_secret;
+    const credential = process.env.SPOTIFY_ID + ":" + process.env.SPOTIFY_SECRET;
     const credential64 = Buffer.from(credential).toString('base64');
     const postData = querystring.stringify({ 'grant_type': 'client_credentials' });
     const options = {
@@ -157,7 +157,7 @@ const searchYoutubeVideo = function(song, callback, callbackError) {
         'q': searchTerms,
         'maxResults': 1,
         'part':'snippet',
-        'key': client_secret.google_key
+        'key': process.env.GOOGLE_KEY
     });
     var url = "https://www.googleapis.com/youtube/v3/search?"+getData;
     var req = https.request(url, (res) => {
@@ -187,7 +187,7 @@ const searchYoutubeChannel = function(artistName, callback, callbackError) {
         'q': artistName,
         'maxResults': 1,
         'part':'snippet',
-        'key': client_secret.google_key
+        'key': process.env.GOOGLE_KEY
     });
     var url = "https://www.googleapis.com/youtube/v3/search?"+getData;
     var req = https.request(url, (res) => {
