@@ -77,7 +77,11 @@ bot.on('message', function(message) {
 const getCallbackError = function (channel, errorMessage) {
     return ((error) => {
         channel.send(errorMessage);
-        console.error("ERROR: " + error);
+        if(error.stack) {
+            console.error("ERROR: " + error.stack);
+        } else {
+            console.error("ERROR: " + error);
+        }
     });
 }
 
