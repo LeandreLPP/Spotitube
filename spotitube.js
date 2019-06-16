@@ -77,7 +77,11 @@ bot.on('message', function(message) {
 const getCallbackError = function (channel, errorMessage) {
     return ((error) => {
         channel.send(errorMessage);
-        console.error("ERROR: " + error);
+        if(error.stack) {
+            console.error("ERROR: " + error.stack);
+        } else {
+            console.error("ERROR: " + error);
+        }
     });
 }
 
@@ -274,7 +278,7 @@ const searchYoutubeChannel = function(artistName, callback, callbackError) {
 }
 
 const searchYoutubeAlbum = function(album, callback, callbackError) {
-    var searchTerms = `${album.artists.join(" ")} ${album.name}`;
+    var searchTerms = `"Provided to YouTube" ${album.artists.join(" ")} ${album.name}`;
     var getData = querystring.stringify({ 
         'type': 'video',
         'q': searchTerms,
@@ -338,7 +342,7 @@ const bulkSearchYoutubeVideos = function(songs) {
             let promises = [];
             
             if(songs.length > 0) {
-                console.log(`Using bulk search to find songs '${songs.map(song => name).join("', '")}'`);
+                console.log(`Using bulk search to find songs '${songs.map(song => song.name).join("', '")}'`);
 
                 for (let song of songs) {
                     promises.push(new Promise(function(resolve, reject) {
