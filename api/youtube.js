@@ -113,7 +113,7 @@ exports.searchAlbum = function(album, callback, callbackError) {
 
                 console.log(`Found ${album.totalTracks - missingSongs.length}/${album.totalTracks} songs during initial album search`)
 
-                bulkSearchYoutubeVideos(missingSongs).then(result => {
+                exports.bulkSearchVideos(missingSongs).then(result => {
                     for(video of result.videos) {
                         codeForTitle[video.title] = video.code;
                     }
@@ -144,7 +144,7 @@ exports.bulkSearchVideos = function(songs) {
                 for (let song of songs) {
                     promises.push(new Promise(function(resolve, reject) {
                         setTimeout(reject, 10 * 1000); // Reject after 10 seconds without a response
-                        searchYoutubeVideo(song, (video) => {
+                        exports.searchVideo(song, (video) => {
                             console.log(`Found: "${video.name}" at youtube code ${video.code}`);
                             resolve({title: song.name, code:video.code});
                         }, reject );
