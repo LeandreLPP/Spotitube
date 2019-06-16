@@ -208,7 +208,7 @@ const getSpotifyToken = function(callback) {
 }
 
 const searchYoutubeVideo = function(song, callback, callbackError) {
-    var searchTerms = `"Provided to YouTube" ${song.name}`;
+    var searchTerms = song.name;
     song.authors.forEach(element => searchTerms += " "+element);
     var getData = querystring.stringify({ 
         'type': 'video',
@@ -274,7 +274,7 @@ const searchYoutubeChannel = function(artistName, callback, callbackError) {
 }
 
 const searchYoutubeAlbum = function(album, callback, callbackError) {
-    var searchTerms = `"Provided to YouTube" ${album.artists.join(" ")} ${album.name}`;
+    var searchTerms = `${album.artists.join(" ")} ${album.name}`;
     var getData = querystring.stringify({ 
         'type': 'video',
         'q': searchTerms,
